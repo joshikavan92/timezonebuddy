@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import CoreLocation
+import ServiceManagement
 
 struct Teammate: Identifiable, Codable, Equatable {
     var id = UUID()
@@ -9,18 +10,20 @@ struct Teammate: Identifiable, Codable, Equatable {
     var imageData: Data?
     var email: String?
     var slackId: String?
+    var groups: Set<String>
     
     enum CodingKeys: String, CodingKey {
-        case id, name, timeZoneIdentifier, imageData, email, slackId
+        case id, name, timeZoneIdentifier, imageData, email, slackId, groups
     }
     
-    init(id: UUID = UUID(), name: String, timeZoneIdentifier: String, imageData: Data?, email: String? = nil, slackId: String? = nil) {
+    init(id: UUID = UUID(), name: String, timeZoneIdentifier: String, imageData: Data?, email: String? = nil, slackId: String? = nil, groups: Set<String> = []) {
         self.id = id
         self.name = name
         self.timeZoneIdentifier = timeZoneIdentifier
         self.imageData = imageData
         self.email = email
         self.slackId = slackId
+        self.groups = groups
     }
     
     var timeZone: TimeZone? {
@@ -62,9 +65,52 @@ class TeammateStore: ObservableObject {
             saveTeammates()
         }
     }
+    @Published var groups: Set<String> = [] {
+        didSet {
+            saveGroups()
+        }
+    }
+    
+    private let fileManager = FileManager.default
+    
+    private var appSupportURL: URL? {
+        guard let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.timezonebuddy"
+        let appFolder = appSupport.appendingPathComponent(bundleID)
+        
+        // Create directory if it doesn't exist
+        if !fileManager.fileExists(atPath: appFolder.path) {
+            try? fileManager.createDirectory(at: appFolder, withIntermediateDirectories: true)
+        }
+        
+        return appFolder
+    }
+    
+    private var teammatesFileURL: URL? {
+        appSupportURL?.appendingPathComponent("teammates.json")
+    }
+    
+    private var groupsFileURL: URL? {
+        appSupportURL?.appendingPathComponent("groups.json")
+    }
     
     init() {
+        // Only load data if it exists in the user's Application Support directory
         loadTeammates()
+        loadGroups()
+        
+        // If this is the first launch (no data exists), initialize with empty state
+        if teammates.isEmpty {
+            // Start with empty arrays - no pre-loaded data
+            teammates = []
+            groups = []
+            
+            // Save the empty state to create the files
+            saveTeammates()
+            saveGroups()
+        }
     }
     
     func addTeammate(_ teammate: Teammate) {
@@ -81,16 +127,68 @@ class TeammateStore: ObservableObject {
         teammates.remove(at: index)
     }
     
+    func addGroup(_ group: String) {
+        groups.insert(group)
+    }
+    
+    func removeGroup(_ group: String) {
+        groups.remove(group)
+        // Remove the group from all teammates
+        for (index, teammate) in teammates.enumerated() {
+            var updatedTeammate = teammate
+            updatedTeammate.groups.remove(group)
+            teammates[index] = updatedTeammate
+        }
+        saveTeammates()
+    }
+    
     private func saveTeammates() {
-        if let encoded = try? JSONEncoder().encode(teammates) {
-            UserDefaults.standard.set(encoded, forKey: "teammates")
+        guard let url = teammatesFileURL else { return }
+        
+        do {
+            let data = try JSONEncoder().encode(teammates)
+            try data.write(to: url)
+        } catch {
+            print("Error saving teammates: \(error)")
         }
     }
     
     private func loadTeammates() {
-        if let data = UserDefaults.standard.data(forKey: "teammates"),
-           let decoded = try? JSONDecoder().decode([Teammate].self, from: data) {
-            teammates = decoded
+        guard let url = teammatesFileURL,
+              fileManager.fileExists(atPath: url.path) else { return }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            teammates = try JSONDecoder().decode([Teammate].self, from: data)
+        } catch {
+            print("Error loading teammates: \(error)")
+            // If there's an error loading data, start fresh
+            teammates = []
+        }
+    }
+    
+    private func saveGroups() {
+        guard let url = groupsFileURL else { return }
+        
+        do {
+            let data = try JSONEncoder().encode(Array(groups))
+            try data.write(to: url)
+        } catch {
+            print("Error saving groups: \(error)")
+        }
+    }
+    
+    private func loadGroups() {
+        guard let url = groupsFileURL,
+              fileManager.fileExists(atPath: url.path) else { return }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            groups = Set(try JSONDecoder().decode([String].self, from: data))
+        } catch {
+            print("Error loading groups: \(error)")
+            // If there's an error loading data, start fresh
+            groups = []
         }
     }
     
@@ -105,6 +203,15 @@ class TeammateStore: ObservableObject {
         teammates = imported
         return true
     }
+    
+    // Clean up all stored data
+    func resetAllData() {
+        guard let appSupport = appSupportURL else { return }
+        
+        try? fileManager.removeItem(at: appSupport)
+        teammates = []
+        groups = []
+    }
 }
 
 struct ContentView: View {
@@ -114,6 +221,7 @@ struct ContentView: View {
     @State private var editingTeammate: Teammate? = nil
     @State private var currentTime = Date()
     @State private var sortOrder: SortOrder = .name
+    @State private var groupBy: GroupBy = .none
     
     enum SortOrder: String, CaseIterable {
         case name = "Name"
@@ -124,6 +232,35 @@ struct ContentView: View {
             case .name: return "person"
             case .time: return "clock"
             }
+        }
+    }
+    
+    enum GroupBy: String, CaseIterable {
+        case none = "None"
+        case group = "Group"
+        case timeZone = "Time Zone"
+        
+        var systemImage: String {
+            switch self {
+            case .none: return "rectangle.grid.1x2"
+            case .group: return "folder"
+            case .timeZone: return "globe"
+            }
+        }
+    }
+    
+    var groupedTeammates: [(String, [Teammate])] {
+        let filtered = filteredTeammates
+        
+        switch groupBy {
+        case .none:
+            return [("All", filtered)]
+        case .group:
+            let grouped = Dictionary(grouping: filtered) { $0.groups.first ?? "Ungrouped" }
+            return grouped.sorted { $0.key < $1.key }
+        case .timeZone:
+            let grouped = Dictionary(grouping: filtered) { $0.timeZoneIdentifier }
+            return grouped.sorted { $0.key < $1.key }
         }
     }
     
@@ -162,68 +299,108 @@ struct ContentView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text("TimezoneBuddy")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.primary)
+                Image("applogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 24)
+                    .padding(.vertical, 2)
+                    .saturation(1.1)
+                    .contrast(1.1)
                 Spacer()
                 Button(action: { showingAddSheet = true }) {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.accentColor)
-                        .font(.system(size: 16))
+                        .font(.system(size: 16, weight: .medium))
                 }
                 .buttonStyle(.plain)
                 .help("Add Teammate")
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.windowBackgroundColor))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                Color(.windowBackgroundColor)
+                    .opacity(0.95)
+                    .background(.ultraThinMaterial)
+            )
             
-            // Search and Sort
+            // Search, Sort, and Group
             HStack(spacing: 8) {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
+                        .font(.system(size: 11))
                     TextField("Search cities or time zones...", text: $searchText)
                         .textFieldStyle(.plain)
                         .font(.system(size: 11))
                 }
-                .padding(8)
-                .background(Color(.controlBackgroundColor))
-                .cornerRadius(8)
+                .padding(6)
+                .background(Color(.controlBackgroundColor).opacity(0.8))
+                .cornerRadius(6)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 0.5)
+                )
                 
                 Menu {
                     Picker("Sort by", selection: $sortOrder) {
-                        Text("Name").tag(SortOrder.name)
-                        Text("Time Difference").tag(SortOrder.time)
+                        ForEach(SortOrder.allCases, id: \.self) { option in
+                            Label(option.rawValue, systemImage: option.systemImage)
+                                .tag(option)
+                        }
                     }
                 } label: {
-                    Image(systemName: "arrow.up.arrow.down")
+                    Image(systemName: sortOrder.systemImage)
                         .foregroundColor(.secondary)
-                        .font(.system(size: 13))
+                        .font(.system(size: 11))
+                        .frame(width: 24, height: 24)
+                        .background(Color(.controlBackgroundColor).opacity(0.8))
+                        .clipShape(Circle())
+                }
+                .menuStyle(.borderlessButton)
+                
+                Menu {
+                    Picker("Group by", selection: $groupBy) {
+                        ForEach(GroupBy.allCases, id: \.self) { option in
+                            Label(option.rawValue, systemImage: option.systemImage)
+                                .tag(option)
+                        }
+                    }
+                } label: {
+                    Image(systemName: groupBy.systemImage)
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 11))
+                        .frame(width: 24, height: 24)
+                        .background(Color(.controlBackgroundColor).opacity(0.8))
+                        .clipShape(Circle())
                 }
                 .menuStyle(.borderlessButton)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Color(.windowBackgroundColor))
+            .background(
+                Color(.windowBackgroundColor)
+                    .opacity(0.95)
+                    .background(.ultraThinMaterial)
+            )
             
             // Teammates List
             if filteredTeammates.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "person.2")
-                        .font(.system(size: 48))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 36))
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .symbolEffect(.bounce, options: .repeating)
                     Text("No teammates yet")
-                        .font(.system(size: 16))
+                        .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.secondary)
                     Button(action: { showingAddSheet = true }) {
                         Text("Add Your First Teammate")
-                            .font(.system(size: 14))
+                            .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.white)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                             .background(Color.accentColor)
-                            .cornerRadius(8)
+                            .cornerRadius(16)
                     }
                     .buttonStyle(.plain)
                 }
@@ -232,13 +409,25 @@ struct ContentView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(filteredTeammates) { teammate in
-                            teammateRow(teammate)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
+                        ForEach(groupedTeammates, id: \.0) { group, teammates in
+                            if groupBy != .none {
+                                Text(group)
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color(.windowBackgroundColor).opacity(0.95))
+                            }
+                            
+                            ForEach(teammates) { teammate in
+                                teammateRow(teammate)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                            }
                         }
                     }
-                    .padding(.vertical, 8)
+                .padding(.vertical, 4)
                 }
                 .background(Color(.windowBackgroundColor))
             }
@@ -249,94 +438,93 @@ struct ContentView: View {
             TeammateEditorView(store: store, teammate: editingTeammate)
         }
         .onReceive(timer) { _ in
-            currentTime = Date()
+            withAnimation {
+                currentTime = Date()
+            }
         }
     }
     
     private func teammateRow(_ teammate: Teammate) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             // Profile Image
             if let imageData = teammate.imageData,
                let nsImage = NSImage(data: imageData) {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color(.separatorColor), lineWidth: 1))
-                    .onTapGesture {
-                        showingAddSheet = true
-                        editingTeammate = teammate
-                    }
-            } else {
+                        Image(nsImage: nsImage)
+                            .resizable()
+                            .scaledToFill()
+                    .frame(width: 32, height: 32)
+                            .clipShape(Circle())
+                    .overlay(Circle().stroke(Color(.separatorColor).opacity(0.2), lineWidth: 0.5))
+                    } else {
                 Image(systemName: "person.circle.fill")
                     .resizable()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(.secondary)
-                    .onTapGesture {
-                        showingAddSheet = true
-                        editingTeammate = teammate
-                    }
+                    .frame(width: 32, height: 32)
+                    .foregroundColor(.secondary.opacity(0.5))
             }
             
-            VStack(alignment: .leading, spacing: 4) {
-                Text(teammate.name)
-                    .font(.system(size: 14, weight: .medium))
+            VStack(alignment: .leading, spacing: 2) {
+                        Text(teammate.name)
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.primary)
                 
-                HStack(spacing: 8) {
-                    Text(teammate.localTime)
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                        Text(teammate.localTime)
+                        .font(.system(size: 11))
+                            .foregroundColor(.secondary)
                     
                     Text(teammate.timeDifference)
-                        .font(.system(size: 13))
-                        .foregroundColor(teammate.timeDifference.hasPrefix("-") ? .red : .green)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(teammate.timeDifference.hasPrefix("-") ? 
+                            .red.opacity(0.7) : 
+                            Color.green.opacity(0.7))
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(
+                            teammate.timeDifference.hasPrefix("-") ?
+                                Color.red.opacity(0.1) :
+                                Color.green.opacity(0.1)
+                        )
+                        .cornerRadius(3)
                 }
             }
             
-            Spacer()
+                    Spacer()
             
             HStack(spacing: 8) {
-                if let email = teammate.email, !email.isEmpty {
-                    Button(action: {
+                        if let email = teammate.email, !email.isEmpty {
+                            Button(action: {
                         NSWorkspace.shared.open(URL(string: "mailto:\(email)")!)
-                    }) {
-                        Image("Outlook")
-                            .resizable()
-                            .frame(width: 14, height: 14)
-                    }
-                    .buttonStyle(.plain)
+                            }) {
+                                Image("Outlook")
+                                    .resizable()
+                            .frame(width: 16, height: 16)
+                            .saturation(1.1)
+                            .opacity(0.8)
+                            }
+                            .buttonStyle(.plain)
                     .help("Email \(teammate.name)")
-                }
-                
-                if let slackId = teammate.slackId, !slackId.isEmpty {
-                    Button(action: {
+                        }
+                        
+                        if let slackId = teammate.slackId, !slackId.isEmpty {
+                            Button(action: {
                         let slackURL = "slack://channel?team=E026NQBKFHU&id=\(slackId)"
-                        NSWorkspace.shared.open(URL(string: slackURL)!)
-                    }) {
-                        Image("Slack")
-                            .resizable()
-                            .frame(width: 14, height: 14)
-                    }
-                    .buttonStyle(.plain)
+                                NSWorkspace.shared.open(URL(string: slackURL)!)
+                            }) {
+                                Image("Slack")
+                                    .resizable()
+                            .frame(width: 16, height: 16)
+                            .saturation(1.1)
+                            .opacity(0.8)
+                            }
+                            .buttonStyle(.plain)
                     .help("Message \(teammate.name) on Slack")
                 }
             }
         }
-        .contentShape(Rectangle())
-        .contextMenu {
-            Button(action: { editingTeammate = teammate }) {
-                Label("Edit", systemImage: "pencil")
-            }
-            Button(role: .destructive, action: {
-                if let index = store.teammates.firstIndex(where: { $0.id == teammate.id }) {
-                    store.deleteTeammate(at: index)
-                }
-            }) {
-                Label("Delete", systemImage: "trash")
-            }
-        }
+        .padding(8)
+        .background(Color(.controlBackgroundColor).opacity(0.05))
+        .cornerRadius(8)
+        .modifier(HoverEffect())
     }
 }
 
@@ -348,6 +536,9 @@ struct TeammateEditorView: View {
     @State private var imageData: Data?
     @State private var email: String?
     @State private var slackId: String?
+    @State private var selectedGroups: Set<String>
+    @State private var newGroup: String = ""
+    @State private var isAddingGroup = false
     var teammateToEdit: Teammate?
     
     init(store: TeammateStore, teammate: Teammate? = nil) {
@@ -357,6 +548,7 @@ struct TeammateEditorView: View {
         _imageData = State(initialValue: teammate?.imageData)
         _email = State(initialValue: teammate?.email)
         _slackId = State(initialValue: teammate?.slackId)
+        _selectedGroups = State(initialValue: teammate?.groups ?? [])
         self.teammateToEdit = teammate
     }
     
@@ -373,8 +565,8 @@ struct TeammateEditorView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    TextField("Name", text: $name)
-                        .textFieldStyle(.roundedBorder)
+                TextField("Name", text: $name)
+                    .textFieldStyle(.roundedBorder)
                 }
                 
                 VStack(alignment: .leading, spacing: 6) {
@@ -386,15 +578,74 @@ struct TeammateEditorView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 6) {
+                    Text("Groups")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(Array(store.groups), id: \.self) { group in
+                                Toggle(isOn: Binding(
+                                    get: { selectedGroups.contains(group) },
+                                    set: { isSelected in
+                                        if isSelected {
+                                            selectedGroups.insert(group)
+                                        } else {
+                                            selectedGroups.remove(group)
+                                        }
+                                    }
+                                )) {
+                                    Text(group)
+                                        .font(.system(size: 11))
+                                }
+                                .toggleStyle(.button)
+                                .buttonStyle(.borderless)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        store.removeGroup(group)
+                                    } label: {
+                                        Label("Delete Group", systemImage: "trash")
+                                    }
+                                }
+                            }
+                            
+                            Button(action: { isAddingGroup = true }) {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.accentColor)
+                            }
+                            .buttonStyle(.plain)
+                            .popover(isPresented: $isAddingGroup) {
+                                VStack(spacing: 12) {
+                                    TextField("New Group Name", text: $newGroup)
+                                        .textFieldStyle(.roundedBorder)
+                                        .frame(width: 200)
+                                    
+                                    Button("Add Group") {
+                                        if !newGroup.isEmpty {
+                                            store.addGroup(newGroup)
+                                            selectedGroups.insert(newGroup)
+                                            newGroup = ""
+                                            isAddingGroup = false
+                                        }
+                                    }
+                                    .disabled(newGroup.isEmpty)
+                                }
+                                .padding()
+                            }
+                        }
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Email (Optional)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    TextField("Email", text: Binding(
-                        get: { email ?? "" },
-                        set: { email = $0.isEmpty ? nil : $0 }
-                    ))
-                    .textFieldStyle(.roundedBorder)
+                TextField("Email", text: Binding(
+                    get: { email ?? "" },
+                    set: { email = $0.isEmpty ? nil : $0 }
+                ))
+                .textFieldStyle(.roundedBorder)
                 }
                 
                 VStack(alignment: .leading, spacing: 6) {
@@ -402,12 +653,12 @@ struct TeammateEditorView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    TextField("Slack ID", text: Binding(
-                        get: { slackId ?? "" },
-                        set: { slackId = $0.isEmpty ? nil : $0 }
-                    ))
-                    .textFieldStyle(.roundedBorder)
-                }
+                TextField("Slack ID", text: Binding(
+                    get: { slackId ?? "" },
+                    set: { slackId = $0.isEmpty ? nil : $0 }
+                ))
+                .textFieldStyle(.roundedBorder)
+            }
             }
             .padding(.horizontal, 8)
             
@@ -428,7 +679,8 @@ struct TeammateEditorView: View {
                         timeZoneIdentifier: timeZone.identifier, 
                         imageData: imageData,
                         email: email,
-                        slackId: slackId
+                        slackId: slackId,
+                        groups: selectedGroups
                     )
                     
                     if teammateToEdit != nil {
@@ -459,7 +711,7 @@ struct CitySearchField: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 TextField("Search city or time zone", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
+                .textFieldStyle(.roundedBorder)
                 
                 Text(formattedTimeZoneName(timeZone))
                     .font(.callout)
@@ -472,7 +724,7 @@ struct CitySearchField: View {
             if isSearching {
                 HStack {
                     Spacer()
-                    ProgressView()
+                ProgressView()
                     Spacer()
                 }
                 .padding(.vertical, 8)
@@ -481,8 +733,8 @@ struct CitySearchField: View {
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(searchResults, id: \.identifier) { tz in
                             Button(action: {
-                                timeZone = tz
-                                searchText = ""
+                    timeZone = tz
+                    searchText = ""
                             }) {
                                 HStack {
                                     Text(formattedTimeZoneName(tz))
@@ -529,7 +781,7 @@ struct CitySearchField: View {
         }
         
         await MainActor.run {
-            isSearching = true
+        isSearching = true
         }
         
         let searchQuery = query.lowercased()
@@ -542,8 +794,8 @@ struct CitySearchField: View {
         
         if !directMatches.isEmpty {
             await MainActor.run {
-                searchResults = directMatches
-                isSearching = false
+            searchResults = directMatches
+            isSearching = false
             }
             return
         }
@@ -556,7 +808,7 @@ struct CitySearchField: View {
             
             if let tz = placemarks.first?.timeZone {
                 await MainActor.run {
-                    self.searchResults = [tz]
+                self.searchResults = [tz]
                     self.isSearching = false
                 }
             } else {
@@ -639,8 +891,8 @@ struct ImagePickerView: View {
                     .frame(width: 80, height: 80)
                     .overlay(
                         Image(systemName: "person.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(.secondary)
+                    .font(.system(size: 32))
+                    .foregroundColor(.secondary)
                     )
                     .onTapGesture {
                         isPickerActive = true
@@ -649,7 +901,7 @@ struct ImagePickerView: View {
             }
             
             HStack(spacing: 8) {
-                Button("Choose Photo") {
+            Button("Choose Photo") {
                     isPickerActive = true
                     showImagePicker()
                 }
@@ -688,25 +940,38 @@ struct ImagePickerView: View {
         // Keep a reference to the app to bring it back to front
         let app = NSApp
         
-        // Bring the panel to front
+        // Bring the panel to front and make it modal
         panel.makeKeyAndOrderFront(nil)
+        panel.level = .modalPanel
         
         panel.begin { response in
             isPickerActive = false
             
             if response == .OK, let url = panel.url {
-                // Process the image in a background thread
+                // Process the image in a background thread with high priority
                 DispatchQueue.global(qos: .userInitiated).async {
-                    if let image = NSImage(contentsOf: url) {
-                        let resizedImage = image.resized(to: CGSize(width: 400, height: 400))
-                        if let data = resizedImage.tiffRepresentation,
-                           let bitmap = NSBitmapImageRep(data: data),
-                           let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.8]) {
-                            DispatchQueue.main.async {
-                                imageData = jpegData
-                                // Bring the app back to front
-                                if let app = app {
-                                    app.activate(ignoringOtherApps: true)
+                    autoreleasepool {
+                        if let image = NSImage(contentsOf: url) {
+                            // Optimize image size before processing
+                            let maxSize: CGFloat = 400
+                            let scale = min(maxSize / image.size.width, maxSize / image.size.height)
+                            let targetSize = CGSize(
+                                width: image.size.width * scale,
+                                height: image.size.height * scale
+                            )
+                            
+                            let resizedImage = image.resized(to: targetSize)
+                            
+                            // Convert to JPEG with optimized quality
+                            if let tiffData = resizedImage.tiffRepresentation,
+                               let bitmap = NSBitmapImageRep(data: tiffData),
+                               let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) {
+                                DispatchQueue.main.async {
+                                    imageData = jpegData
+                                    // Bring the app back to front
+                                    if let app = app {
+                                        app.activate(ignoringOtherApps: true)
+                                    }
                                 }
                             }
                         }
@@ -768,6 +1033,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     var store = TeammateStore()
     private var timer: Timer?
     private var contentViewController: NSHostingController<ContentView>?
+    private var loginService: SMAppService?
     
     private var mainMenu: NSMenu {
         let menu = NSMenu()
@@ -786,12 +1052,87 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         
         menu.addItem(NSMenuItem.separator())
         
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        // Add auto-launch toggle
+        let autoLaunchItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleAutoLaunch), keyEquivalent: "l")
+        autoLaunchItem.keyEquivalentModifierMask = [.command]
+        autoLaunchItem.state = isAutoLaunchEnabled ? .on : .off
+        menu.addItem(autoLaunchItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        // Add reset data option
+        let resetItem = NSMenuItem(title: "Reset App Data", action: #selector(resetAppData), keyEquivalent: "")
+        menu.addItem(resetItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        menu.addItem(NSMenuItem(title: "Quit TimezoneBuddy", action: #selector(quitApp), keyEquivalent: "q"))
         
         return menu
     }
+    
+    private var isAutoLaunchEnabled: Bool {
+        if #available(macOS 13.0, *) {
+            return loginService?.status == .enabled
+        } else {
+            // Fallback for older macOS versions
+            if let bundleIdentifier = Bundle.main.bundleIdentifier {
+                return SMLoginItemSetEnabled(bundleIdentifier as CFString, true)
+            }
+            return false
+        }
+    }
+    
+    @objc private func toggleAutoLaunch() {
+        if #available(macOS 13.0, *) {
+            do {
+                if loginService == nil {
+                    loginService = SMAppService.loginItem(identifier: "com.timezonebuddy")
+                }
+                
+                if let service = loginService {
+                    if service.status == .enabled {
+                        try service.unregister()
+                    } else {
+                        try service.register()
+                    }
+                    
+                    // Update menu item state
+                    if let menu = statusItem?.menu {
+                        if let item = menu.item(withTitle: "Launch at Login") {
+                            item.state = service.status == .enabled ? .on : .off
+                        }
+                    }
+                }
+            } catch {
+                print("Failed to toggle auto-launch: \(error)")
+            }
+        } else {
+            // Fallback for older macOS versions
+            if let bundleIdentifier = Bundle.main.bundleIdentifier {
+                let enabled = !isAutoLaunchEnabled
+                SMLoginItemSetEnabled(bundleIdentifier as CFString, enabled)
+                
+                // Update menu item state
+                if let menu = statusItem?.menu {
+                    if let item = menu.item(withTitle: "Launch at Login") {
+                        item.state = enabled ? .on : .off
+                    }
+                }
+            }
+        }
+    }
+    
+    @objc private func quitApp() {
+        NSApp.terminate(nil)
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Initialize login service
+        if #available(macOS 13.0, *) {
+            loginService = SMAppService.loginItem(identifier: "com.timezonebuddy")
+        }
+        
         let contentView = ContentView(store: store)
         let hostingController = NSHostingController(rootView: contentView)
         self.contentViewController = hostingController
@@ -804,7 +1145,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem?.button {
+            // Use system globe icon
             button.image = NSImage(systemSymbolName: "globe", accessibilityDescription: "Timezone Buddy")
+            button.imagePosition = .imageLeft
             button.action = #selector(togglePopover(_:))
             button.target = self
         }
@@ -906,8 +1249,44 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         alert.runModal()
     }
     
+    @objc private func resetAppData() {
+        let alert = NSAlert()
+        alert.messageText = "Reset App Data"
+        alert.informativeText = "Are you sure you want to reset all app data? This will remove all teammates and groups. This action cannot be undone."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Reset")
+        alert.addButton(withTitle: "Cancel")
+        
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            store.resetAllData()
+            // Update the UI
+            contentViewController?.rootView = ContentView(store: store)
+        }
+    }
+    
     func applicationWillTerminate(_ notification: Notification) {
         timer?.invalidate()
+    }
+}
+
+struct HoverEffect: ViewModifier {
+    @State private var isHovered = false
+    
+    func body(content: Content) -> some View {
+        content
+            .onHover { hovering in
+                isHovered = hovering
+                if hovering {
+                    NSCursor.pointingHand.set()
+                } else {
+                    NSCursor.arrow.set()
+                }
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.secondary.opacity(isHovered ? 0.2 : 0))
+            )
     }
 }
 
