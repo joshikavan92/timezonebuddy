@@ -2,7 +2,7 @@
 
 A macOS menu bar application that helps you track your teammates' time zones. Perfect for distributed teams working across different time zones.
 
-Repository: [https://github.com/joshikavan92/timezonebuddy](https://github.com/joshikavan92/timezonebuddy)
+
 
 ## Features
 
