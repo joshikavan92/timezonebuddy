@@ -2,7 +2,7 @@
 
 A macOS menu bar application that helps you track your teammates' time zones. Perfect for distributed teams working across different time zones.
 
-
+<img width="392" alt="Screenshot 2025-04-07 at 12 59 48 PM" src="https://github.com/user-attachments/assets/7c0dbce9-7eef-4415-8820-eaf97e7f5075" />
 
 ## Features
 
@@ -44,11 +44,11 @@ A macOS menu bar application that helps you track your teammates' time zones. Pe
 3. Look at the URL: `https://app.slack.com/client/T12345678/C23456789`
 4. Your Team ID is the segment starting with 'T' (e.g., T12345678)
 
-## Building from Source
+## Sort and Group by Options
 
-1. Clone the repository
-2. Open TimezoneBuddy.xcodeproj in Xcode
-3. Build and run the project
+1. Sort by Times, Names
+2. Group by Name, Custom Groups and TimeZones
+
 
 ## Privacy
 
