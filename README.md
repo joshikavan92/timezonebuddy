@@ -1,8 +1,11 @@
+
+![TimezoneBuddyAppIcon Resize](https://github.com/user-attachments/assets/e123a6a5-04c2-4815-a04e-7b087e5f85fd)
+
 # TimezoneBuddy
 
-A macOS menu bar application that helps you track your teammates' time zones. Perfect for distributed teams working across different time zones.
+A macOS menu bar application that helps you track your teammates' time zones and initiate quick Slack & Email from anywhere in your screen. Perfect for distributed teams working across different time zones.
 
-Repository: [https://github.com/joshikavan92/timezonebuddy](https://github.com/joshikavan92/timezonebuddy)
+<img width="392" alt="Screenshot 2025-04-07 at 12 59 48 PM" src="https://github.com/user-attachments/assets/7c0dbce9-7eef-4415-8820-eaf97e7f5075" />
 
 ## Features
 
@@ -44,11 +47,11 @@ Repository: [https://github.com/joshikavan92/timezonebuddy](https://github.com/j
 3. Look at the URL: `https://app.slack.com/client/T12345678/C23456789`
 4. Your Team ID is the segment starting with 'T' (e.g., T12345678)
 
-## Building from Source
+## Sort and Group by Options
 
-1. Clone the repository
-2. Open TimezoneBuddy.xcodeproj in Xcode
-3. Build and run the project
+1. Sort by Times, Names
+2. Group by Name, Custom Groups and TimeZones
+
 
 ## Privacy
 
