@@ -1082,6 +1082,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         
         menu.addItem(NSMenuItem.separator())
         
+        // Add Settings option
+        let settingsItem = NSMenuItem(title: "Settings", action: #selector(showSettings), keyEquivalent: ",")
+        settingsItem.keyEquivalentModifierMask = [.command]
+        menu.addItem(settingsItem)
+        
         // Add auto-launch toggle
         let autoLaunchItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleAutoLaunch), keyEquivalent: "l")
         autoLaunchItem.keyEquivalentModifierMask = [.command]
@@ -1343,6 +1348,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         NSApp.activate(ignoringOtherApps: true)
     }
     
+    @objc func showSettings() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 460, height: 500),
+            styleMask: [.titled, .closable, .resizable, .miniaturizable],
+            backing: .buffered,
+            defer: false
+        )
+        
+        let settingsView = SettingsView(store: store, window: window)
+        let hostingController = NSHostingController(rootView: settingsView)
+        
+        window.contentViewController = hostingController
+        window.title = "Settings"
+        window.center()
+        window.level = .floating  // Make window stay on top
+        window.makeKeyAndOrderFront(nil)
+        
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    
     func applicationWillTerminate(_ notification: Notification) {
         timer?.invalidate()
         timer = nil
@@ -1433,10 +1458,10 @@ struct SlackTeamIdGuideView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     GuideStep(number: 1, text: "Open Slack in your web browser")
-                    GuideStep(number: 2, text: "Click on your workspace name in the top-left corner")
-                    GuideStep(number: 3, text: "Click on 'View workspace settings'")
-                    GuideStep(number: 4, text: "Scroll down to find your Team ID")
-                    GuideStep(number: 5, text: "Copy the Team ID and paste it here")
+                    GuideStep(number: 2, text: "Go to any Slack channel or DM")
+                    GuideStep(number: 3, text: "Look at the URL in your browser")
+                    GuideStep(number: 4, text: "The URL will look like: https://app.slack.com/client/T12345678/C23456789")
+                    GuideStep(number: 5, text: "The Team ID is the part after 'client/' and before the next '/', starting with 'T'")
                     
                     Text("Note: The Team ID is a unique identifier for your Slack workspace, usually starting with 'T' followed by a series of letters and numbers.")
                         .font(.callout)
@@ -1471,6 +1496,163 @@ struct GuideStep: View {
             Text(text)
                 .font(.body)
         }
+    }
+}
+
+struct SettingsView: View {
+    @ObservedObject var store: TeammateStore
+    @State private var slackTeamId: String = ""
+    @State private var newGroupName: String = ""
+    @State private var showingGuide = false
+    let window: NSWindow?
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            Text("Settings")
+                .font(.system(size: 20, weight: .semibold))
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+                .background(Color(.windowBackgroundColor))
+            
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Slack Team ID Section
+                    GroupBox {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Slack Integration")
+                                .font(.headline)
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Team ID")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                
+                                HStack {
+                                    TextField("Enter Slack Team ID", text: $slackTeamId)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    
+                                    Button("Update") {
+                                        store.slackTeamId = slackTeamId
+                                    }
+                                    .disabled(slackTeamId.isEmpty)
+                                }
+                                
+                                if !store.slackTeamId.isEmpty {
+                                    Text("Current: \(store.slackTeamId)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Button("How to find your Team ID?") {
+                                    showingGuide = true
+                                }
+                                .buttonStyle(.link)
+                                .font(.subheadline)
+                            }
+                        }
+                        .padding(4)
+                    }
+                    .groupBoxStyle(SettingsGroupBoxStyle())
+                    
+                    // Group Management Section
+                    GroupBox {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Group Management")
+                                .font(.headline)
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Add New Group")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                
+                                HStack {
+                                    TextField("Enter group name", text: $newGroupName)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    
+                                    Button("Add") {
+                                        if !newGroupName.isEmpty {
+                                            store.addGroup(newGroupName)
+                                            newGroupName = ""
+                                        }
+                                    }
+                                    .disabled(newGroupName.isEmpty)
+                                }
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Existing Groups")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                
+                                if store.groups.isEmpty {
+                                    Text("No groups created yet")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                        .italic()
+                                        .padding(.vertical, 8)
+                                } else {
+                                    List {
+                                        ForEach(Array(store.groups).sorted(), id: \.self) { group in
+                                            HStack {
+                                                Text(group)
+                                                Spacer()
+                                                Button(action: {
+                                                    store.removeGroup(group)
+                                                }) {
+                                                    Image(systemName: "trash")
+                                                        .foregroundColor(.red)
+                                                }
+                                                .buttonStyle(.plain)
+                                            }
+                                        }
+                                    }
+                                    .frame(height: min(CGFloat(store.groups.count) * 28 + 8, 200))
+                                    .cornerRadius(6)
+                                }
+                            }
+                        }
+                        .padding(4)
+                    }
+                    .groupBoxStyle(SettingsGroupBoxStyle())
+                }
+                .padding(20)
+            }
+            
+            Divider()
+            
+            // Footer
+            HStack {
+                Spacer()
+                Button("Close") {
+                    window?.close()
+                }
+                .keyboardShortcut(.defaultAction)
+                .controlSize(.large)
+            }
+            .padding(16)
+            .background(Color(.windowBackgroundColor))
+        }
+        .frame(minWidth: 460, minHeight: 500, maxHeight: .infinity)
+        .onAppear {
+            slackTeamId = store.slackTeamId
+            window?.level = .floating  // Make window stay on top
+        }
+        .sheet(isPresented: $showingGuide) {
+            SlackTeamIdGuideView(window: window)
+        }
+    }
+}
+
+struct SettingsGroupBoxStyle: GroupBoxStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            configuration.content
+        }
+        .frame(maxWidth: .infinity)
+        .padding(16)
+        .background(Color(.controlBackgroundColor))
+        .cornerRadius(10)
     }
 }
 
