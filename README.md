@@ -1,11 +1,12 @@
-
 ![TimezoneBuddyAppIcon Resize](https://github.com/user-attachments/assets/e123a6a5-04c2-4815-a04e-7b087e5f85fd)
 
 # TimezoneBuddy
 
+Initial Release v1.0.0 - April 7, 2024
+
 A macOS menu bar application that helps you track your teammates' time zones and initiate quick Slack & Email from anywhere in your screen. Perfect for distributed teams working across different time zones.
 
-<img width="392" alt="Screenshot 2025-04-07 at 12 59 48 PM" src="https://github.com/user-attachments/assets/7c0dbce9-7eef-4415-8820-eaf97e7f5075" />
+<img width="392" alt="Screenshot 2025-04-07 at 12 59 48 PM" src="https://github.com/user-attachments/assets/7c0dbce9-7eef-4415-8820-eaf97e7f5075" />
 
 ## Features
 
@@ -20,7 +21,7 @@ A macOS menu bar application that helps you track your teammates' time zones and
 
 ## Requirements
 
-- macOS 13.0 (Ventura) or later
+- macOS 14.0 (Sonoma) or later
 - Slack workspace access (for team integration)
 
 ## Installation
