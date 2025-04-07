@@ -1,6 +1,8 @@
+![TimezoneBuddyAppIcon](https://github.com/user-attachments/assets/081d9702-ecd8-4d04-b295-d7989d83b35c)
+
 # TimezoneBuddy
 
-A macOS menu bar application that helps you track your teammates' time zones. Perfect for distributed teams working across different time zones.
+A macOS menu bar application that helps you track your teammates' time zones and initiate quick Slack & Email from anywhere in your screen. Perfect for distributed teams working across different time zones.
 
 <img width="392" alt="Screenshot 2025-04-07 at 12 59 48 PM" src="https://github.com/user-attachments/assets/7c0dbce9-7eef-4415-8820-eaf97e7f5075" />
 
