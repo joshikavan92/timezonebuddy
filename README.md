@@ -17,7 +17,7 @@ Repository: [https://github.com/joshikavan92/timezonebuddy](https://github.com/j
 
 ## Requirements
 
-- macOS 15.4 or later
+- macOS 13.0 (Ventura) or later
 - Slack workspace access (for team integration)
 
 ## Installation
