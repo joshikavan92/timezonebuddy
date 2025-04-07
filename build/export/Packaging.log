@@ -1,0 +1,135 @@
+2025-04-07 06:50:07 +0000 [MT] Initial pipeline context: <IDEDistributionProcessingPipelineContext: 0x111324000; archive(resolved)="<IDEArchive: 0x112f13620>", distributionTask(resolved)="2", distributionDestination(resolved)="1", distributionMethod(resolved)="<IDEDistributionMethodDeveloperID: 0x141a25430>", team(resolved)="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	Chain (12, self inclusive):
+	<IDEDistributionProcessingPipelineContext: 0x111324000; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionProcessingPipelineContext: 0x111346890; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionContext: 0x111325ae0; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionContext: 0x115a8dc10; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionContext: 0x115a89190; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionContext: 0x115a88400; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionContext: 0x112f42f90; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionContext: 0x112e4f790; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionContext: 0x10fbf4c10; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="<IDEProvisioningBasicTeam: 0x112f20f00; teamID='L9GM633593', teamName='(null)'>">
+	<IDEDistributionContext: 0x112e331f0; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="(null)">
+	<IDEDistributionContext: 0x112f0b660; archive = "<IDEArchive: 0x112f13620>", distributionMethod="<IDEDistributionMethodDeveloperID: 0x141a25430>", team="(null)">
+	<IDEDistributionContext: 0x112f13a30; archive = "<IDEArchive: 0x112f13620>", distributionMethod="(null)", team="(null)">
+</IDEDistributionProcessingPipelineContext: 0x111324000>
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionCreateDestRootStep
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionCopyItemStep
+2025-04-07 06:50:07 +0000 [MT] Running /usr/bin/ditto '-V' '/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app' '/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app'
+2025-04-07 06:50:07 +0000  >>> Copying /Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app 
+2025-04-07 06:50:07 +0000  copying file ./Contents/_CodeSignature/CodeResources ... 
+2025-04-07 06:50:07 +0000  2672 bytes for ./Contents/_CodeSignature/CodeResources
+2025-04-07 06:50:07 +0000  copying file ./Contents/MacOS/TimezoneBuddy ... 
+2025-04-07 06:50:07 +0000  464864 bytes for ./Contents/MacOS/TimezoneBuddy
+2025-04-07 06:50:07 +0000  copying file ./Contents/Resources/AppIcon.icns ... 
+2025-04-07 06:50:07 +0000  94644 bytes for ./Contents/Resources/AppIcon.icns
+2025-04-07 06:50:07 +0000  copying file ./Contents/Resources/Assets.car ... 
+2025-04-07 06:50:07 +0000  1829480 bytes for ./Contents/Resources/Assets.car
+2025-04-07 06:50:07 +0000  copying file ./Contents/Info.plist ... 
+2025-04-07 06:50:07 +0000  1468 bytes for ./Contents/Info.plist
+2025-04-07 06:50:07 +0000  copying file ./Contents/PkgInfo ... 
+2025-04-07 06:50:07 +0000  8 bytes for ./Contents/PkgInfo
+2025-04-07 06:50:07 +0000 [MT] /usr/bin/ditto exited with 0
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionEmbedProfileStep
+2025-04-07 06:50:07 +0000 [MT] Skipping profile for item: <IDEDistributionItem: 0x112e4aac0; bundleID='com.joshikavan.TimezoneBuddy', path='<DVTFilePath:0x112f130f0:'/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x114f17ec0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x112f45110; name='Apple Development: Kavankumar Joshi (962YA473XH)', hash='E6172235A012E7F4823644DC2872594954ACFF9A', serialNumber='3AEB7F3C353C4290ACB84EE7F7D4EBFF', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-04-07 04:24:52 +0000''>', entitlements='{
+    "com.apple.security.app-sandbox" = 1;
+    "com.apple.security.automation.apple-events" = 1;
+    "com.apple.security.files.user-selected.read-write" = 1;
+    "com.apple.security.temporary-exception.apple-events" =     (
+        "com.apple.systemevents"
+    );
+}', teamID='L9GM633593', identifier='com.joshikavan.TimezoneBuddy', executablePath='<DVTFilePath:0x111336a90:'/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app/Contents/MacOS/TimezoneBuddy'>', hardenedRuntime='1'>'>
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionInfoPlistStep
+2025-04-07 06:50:07 +0000 [MT] Skipping step: IDEDistributionInfoPlistStep because it said so
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionAppThinningPlistStep
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionSymbolsStep
+2025-04-07 06:50:07 +0000 [MT] Skipping step: IDEDistributionSymbolsStep because it said so
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionAppThinningStep
+2025-04-07 06:50:07 +0000 [MT] Skipping step: IDEDistributionAppThinningStep because it said so
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionArchThinningStep
+2025-04-07 06:50:07 +0000 [MT] Item /Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app doesn't have the entitlement com.apple.developer.web-browser-engine.host enabled, returning ["arm64e"]
+2025-04-07 06:50:07 +0000 [MT] Archs to thin for item /Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app are ["arm64e"]
+2025-04-07 06:50:07 +0000 [MT] Running /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo '/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app/Contents/MacOS/TimezoneBuddy' '-verify_arch' 'arm64e'
+2025-04-07 06:50:07 +0000 [MT] /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo exited with 1
+2025-04-07 06:50:07 +0000 [MT] Skipping architecture thinning for item "TimezoneBuddy" because arch "arm64e" wasn't found
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionODRStep
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionStripXattrsStep
+2025-04-07 06:50:07 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2025-04-07 06:50:07 +0000 [MT] Processing step: IDEDistributionCodesignStep
+2025-04-07 06:50:07 +0000 [MT] Entitlements for <IDEDistributionItem: 0x112e4aac0; bundleID='com.joshikavan.TimezoneBuddy', path='<DVTFilePath:0x112f130f0:'/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x114f17ec0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x112fbf470; name='Apple Development: Kavankumar Joshi (962YA473XH)', hash='E6172235A012E7F4823644DC2872594954ACFF9A', serialNumber='3AEB7F3C353C4290ACB84EE7F7D4EBFF', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-04-07 04:24:52 +0000''>', entitlements='{
+    "com.apple.security.app-sandbox" = 1;
+    "com.apple.security.automation.apple-events" = 1;
+    "com.apple.security.files.user-selected.read-write" = 1;
+    "com.apple.security.temporary-exception.apple-events" =     (
+        "com.apple.systemevents"
+    );
+}', teamID='L9GM633593', identifier='com.joshikavan.TimezoneBuddy', executablePath='<DVTFilePath:0x111336a90:'/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app/Contents/MacOS/TimezoneBuddy'>', hardenedRuntime='1'>'>: {
+    "com.apple.security.app-sandbox" = 1;
+    "com.apple.security.automation.apple-events" = 1;
+    "com.apple.security.files.user-selected.read-write" = 1;
+    "com.apple.security.temporary-exception.apple-events" =     (
+        "com.apple.systemevents"
+    );
+}
+2025-04-07 06:50:07 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2025-04-07 06:50:07 +0000 [MT] Entitlements for <IDEDistributionItem: 0x112e4aac0; bundleID='com.joshikavan.TimezoneBuddy', path='<DVTFilePath:0x112f130f0:'/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x114f17ec0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x112fbfc90; name='Apple Development: Kavankumar Joshi (962YA473XH)', hash='E6172235A012E7F4823644DC2872594954ACFF9A', serialNumber='3AEB7F3C353C4290ACB84EE7F7D4EBFF', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-04-07 04:24:52 +0000''>', entitlements='{
+    "com.apple.security.app-sandbox" = 1;
+    "com.apple.security.automation.apple-events" = 1;
+    "com.apple.security.files.user-selected.read-write" = 1;
+    "com.apple.security.temporary-exception.apple-events" =     (
+        "com.apple.systemevents"
+    );
+}', teamID='L9GM633593', identifier='com.joshikavan.TimezoneBuddy', executablePath='<DVTFilePath:0x111336a90:'/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app/Contents/MacOS/TimezoneBuddy'>', hardenedRuntime='1'>'> are: {
+    "com.apple.security.app-sandbox" = 1;
+    "com.apple.security.automation.apple-events" = 1;
+    "com.apple.security.files.user-selected.read-write" = 1;
+    "com.apple.security.temporary-exception.apple-events" =     (
+        "com.apple.systemevents"
+    );
+}
+2025-04-07 06:50:07 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0x112e4aac0; bundleID='com.joshikavan.TimezoneBuddy', path='<DVTFilePath:0x112f130f0:'/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x114f17ec0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x114f57460; name='Apple Development: Kavankumar Joshi (962YA473XH)', hash='E6172235A012E7F4823644DC2872594954ACFF9A', serialNumber='3AEB7F3C353C4290ACB84EE7F7D4EBFF', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-04-07 04:24:52 +0000''>', entitlements='{
+    "com.apple.security.app-sandbox" = 1;
+    "com.apple.security.automation.apple-events" = 1;
+    "com.apple.security.files.user-selected.read-write" = 1;
+    "com.apple.security.temporary-exception.apple-events" =     (
+        "com.apple.systemevents"
+    );
+}', teamID='L9GM633593', identifier='com.joshikavan.TimezoneBuddy', executablePath='<DVTFilePath:0x111336a90:'/Users/kavan.joshi/Library/CloudStorage/OneDrive-Jamf/K1 Jamf SE/Scripts/Apps - XCode/macOS/TimeZone Bud/TimezoneBuddy/build/TimezoneBuddy.xcarchive/Products/Applications/TimezoneBuddy.app/Contents/MacOS/TimezoneBuddy'>', hardenedRuntime='1'>'> to: /var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/entitlements~~~4va5ZC
+2025-04-07 06:50:07 +0000 [MT] invoking codesign: <NSConcreteTask: 0x1407f00a0; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    A703E52A7BBDCAAD2F4DD6E216BD4BCB817AAEF8,
+    "--entitlements",
+    "/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/entitlements~~~4va5ZC",
+    "--requirements",
+    "=designated => anchor apple generic  and identifier \"$self.identifier\" and ((cert leaf[field.1.2.840.113635.100.6.1.9] exists) or ( certificate 1[field.1.2.840.113635.100.6.2.6] exists and certificate leaf[field.1.2.840.113635.100.6.1.13] exists  and certificate leaf[subject.OU] = \"L9GM633593\" ))",
+    "--preserve-metadata=identifier,flags,runtime",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app"
+)'>
+2025-04-07 06:50:08 +0000 [MT] codesign output: /var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app: replacing existing signature
+/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app: signed app bundle with Mach-O thin (arm64) [com.joshikavan.TimezoneBuddy]
+2025-04-07 06:50:08 +0000 [MT] Processing step: IDEDistributionZipODRItemStep
+2025-04-07 06:50:08 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2025-04-07 06:50:08 +0000 [MT] Processing step: IDEDistributionSkipPackagingStep
+2025-04-07 06:50:08 +0000 [MT] Processing step: IDEDistributionAppStoreInformationStep
+2025-04-07 06:50:08 +0000 [MT] Skipping step: IDEDistributionAppStoreInformationStep because it said so
+2025-04-07 06:50:08 +0000 [MT] Processing step: IDEDistributionGenerateProcessedDistributionItems
+2025-04-07 06:50:08 +0000 [MT] IDEDistributionItem init <DVTFilePath:0x114f59850:'/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app'>
+2025-04-07 06:50:08 +0000 [MT] [OPTIONAL] Didn't find embedded provisioning profile for <DVTFilePath:0x114f59850:'/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app'>: Error Domain=NSCocoaErrorDomain Code=4 "No file at <DVTFilePath:0x112f8fb70:'/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app/Contents/embedded.provisionprofile'>" UserInfo={NSLocalizedDescription=No file at <DVTFilePath:0x112f8fb70:'/var/folders/f2/csj7151n4c57d7ny93w4h0s40000gp/T/XcodeDistPipeline.~~~nIoCkS/Root/Applications/TimezoneBuddy.app/Contents/embedded.provisionprofile'>}
+2025-04-07 06:50:08 +0000 [MT] Processing step: IDEDistributionCreateManifestStep
+2025-04-07 06:50:08 +0000 [MT] Skipping step: IDEDistributionCreateManifestStep because it said so
