@@ -1,4 +1,5 @@
-![TimezoneBuddyAppIcon](https://github.com/user-attachments/assets/081d9702-ecd8-4d04-b295-d7989d83b35c)
+
+![TimezoneBuddyAppIcon Resize](https://github.com/user-attachments/assets/e123a6a5-04c2-4815-a04e-7b087e5f85fd)
 
 # TimezoneBuddy
 
