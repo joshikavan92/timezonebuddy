@@ -5,6 +5,7 @@
 Initial Release v1.0.0 - April 7, 2024
 
 A macOS menu bar application that helps you track your teammates' time zones and initiate quick Slack & Email from anywhere in your screen. Perfect for distributed teams working across different time zones.
+We interact a lot of our colleagues who works out of different timezones, and it always annoy to look at their slack or macOS Widget to check their city's name. 
 
 <img width="392" alt="Screenshot 2025-04-07 at 12 59 48 PM" src="https://github.com/user-attachments/assets/7c0dbce9-7eef-4415-8820-eaf97e7f5075" />
 
