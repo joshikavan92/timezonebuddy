@@ -14,6 +14,7 @@ We interact a lot of our colleagues who works out of different timezones, and it
 - 🌍 Display teammates' local times in your menu bar
 - 🔄 Real-time updates with background refresh
 - ⚙️ Easy configuration through settings panel
+- 📤 Quick access to Mail integration
 - 🚀 Quick access to Slack team integration
 - 💾 Persistent storage of team member data
 - 🖥️ Native macOS menu bar app
