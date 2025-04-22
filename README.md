@@ -75,4 +75,5 @@ No source code is provided or intended to be open-sourced.
 
 ## Support
 
-For issues and feature requests, please open an issue on the [GitHub repository](https://github.com/joshikavan92/timezonebuddy). 
+For issues and feature requests, please open an issue on the [GitHub repository](https://github.com/joshikavan92/timezonebuddy) or reach out to joshikavan92@gmail.com. 
+
