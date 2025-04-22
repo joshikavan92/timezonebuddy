@@ -63,6 +63,16 @@ TimezoneBuddy respects your privacy:
 - All data is stored locally on your device
 - Slack integration only requires your Team ID
 
+
+## License
+
+This application is proprietary software. All rights reserved. No source code is published. Redistribution or reverse engineering is not permitted.
+
+This project was previously published with an MIT License by mistake.
+The license has been removed and this software is now distributed as proprietary software.
+No source code is provided or intended to be open-sourced.
+
+
 ## License
 
 MIT License - See LICENSE file for details
