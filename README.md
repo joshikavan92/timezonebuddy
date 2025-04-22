@@ -73,10 +73,6 @@ The license has been removed and this software is now distributed as proprietary
 No source code is provided or intended to be open-sourced.
 
 
-## License
-
-MIT License - See LICENSE file for details
-
 ## Support
 
 For issues and feature requests, please open an issue on the [GitHub repository](https://github.com/joshikavan92/timezonebuddy). 
